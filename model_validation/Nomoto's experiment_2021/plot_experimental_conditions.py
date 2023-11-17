@@ -32,6 +32,8 @@ total = df['normalized_radiation_B'].sum()
 df['normalized_radiation_B'] /= total
 # Define normalized radiation C (Radiation C is used as it is because there is no filter effect)
 df['normalized_radiation_C'] = radiation_c
+total = df['normalized_radiation_C'].sum()
+df['normalized_radiation_C'] /= total
 
 # Save the file as input summary
 df.to_csv('input_summary.csv', index=False)

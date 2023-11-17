@@ -1,29 +1,32 @@
+import os
+import pandas as pd
 import matplotlib.pyplot as plt
 from model import ReceptorModel
 import plot_experimental_conditions as condition
 import configration as config
-df = condition.df
-# df.columns = ["wavelength", "ab", "scat", "ref", "A (0.8 - 1.4 µm)", "B (2.3 - 5.0 µm)", "C (2.3 µm upward)"]
 
+# Constants
+DATA_FILE_PATH = "C:\\Users\\monyo\\PycharmProjects\\wavelength\\model_validation\\Narita's_experiment_1999\\normalized_spectral_radiance.csv"
 plt.rcParams['font.family'] = 'Arial'
-# model.wavelength = df["wavelength_nm"].values * 10**-3  # from nm to µm
-# model.spectral_reflectance = df["reflectance_nd"].values
-# spectral_transmittance = df["transmittance_nd"].values
-# spectral_absorption_coefficient = df["absorption_coefficient_1/mm"].values
-# spectral_scattering_coefficient = df["scattering_coefficient_1/mm"].values
+
+# Read the data
+df = pd.read_csv(DATA_FILE_PATH)
+
+df.columns = ["wavelength_nm", "Visible (0.30–0.84 µm)", "Near-infrared (0.80 – 1.35 µm)", "Mid-infrared (1.70 – 2.30 µm)"]
+df.index = df["wavelength_nm"]
+print(type(df["Visible (0.30–0.84 µm)"]))
+print(df["Visible (0.30–0.84 µm)"])
 
 #Energy Distribution of Three Types of Radiance
-qa = 228 # irradiation intensity A
-qb = 184 # irradiation intensity B
-qc = 211 # irradiation intensity C
-t_db = 25.3
-t_r = 25.2
-t_core = 33.6
-hc = 4.5 # convective heat transfer coefficient [W/m2K]
+q_total = 1220
+t_db = 24.7
+t_r = 25.5
+t_core = 34.3
+hc = 6.4 # convective heat transfer coefficient [W/m2K]
 hr = 5.1 # radiative heat transfer coefficient [W/m2K]
 
 result = {}
-for rad_name in ["A (0.8 - 1.4 µm)", "B (2.3 - 5.0 µm)", "C (2.3 µm upward)"]:  #[W/m2/10nm]
+for rad_name in ["Visible (0.30–0.84 µm)", "Near-infrared (0.80 – 1.35 µm)", "Mid-infrared (1.70 – 2.30 µm)"]:  #[W/m2/10nm]
 
     model = ReceptorModel()
     model.reset_simulation()
@@ -31,33 +34,24 @@ for rad_name in ["A (0.8 - 1.4 µm)", "B (2.3 - 5.0 µm)", "C (2.3 µm upward)"]
     model.T_core = t_core
     model.hc = hc
     model.hr = hr
+    # model.q_total_irradiance = q_total
 
-    if rad_name == "A (0.8 - 1.4 µm)":
-      model.q_total_irradiance = qa
-      model.q_spectrum = df["normalized_radiation_A"]
-    elif rad_name == "B (2.3 - 5.0 µm)":
-        model.q_total_irradiance = qb
-        model.q_spectrum = df["normalized_radiation_B"]
-    else: # C (2.3µm-)
-        model.q_total_irradiance = qc
-        model.q_spectrum = df["normalized_radiation_C"]
+    model.q_spectrum = df[rad_name]
 
     model.add_phase(duration_in_sec=1000, t_db=t_db, t_r=t_r, q_irradiance=0)
-    model.add_phase(duration_in_sec=20, t_db=t_db, t_r=t_r, q_irradiance=model.q_total_irradiance)
+    model.add_phase(duration_in_sec=20, t_db=t_db, t_r=t_r, q_irradiance=q_total)
 
     df_simulation_results = model.simulate(show_input=True)
 
-    csv_path = rad_name + ".csv"
-    df_simulation_results.to_csv(csv_path)
+    csv_path = f"Narita_1999_simulation_results_{rad_name}.csv"
+    df_simulation_results.to_csv(os.path.join(config.DATA_DIRECTORY, csv_path))
 
     result[rad_name] = df_simulation_results.copy()
 
 
-print(result["B (2.3 - 5.0 µm)"])
-
 fig1, axes = plt.subplots(2, 2, figsize=(11, 6.5))
 
-for rad_name in ["A (0.8 - 1.4 µm)", "B (2.3 - 5.0 µm)", "C (2.3 µm upward)"]:
+for rad_name in ["Visible (0.30–0.84 µm)", "Near-infrared (0.80 – 1.35 µm)", "Mid-infrared (1.70 – 2.30 µm)"]:
     dfh = result[rad_name].copy()
 
     marker_size = 5
@@ -66,6 +60,7 @@ for rad_name in ["A (0.8 - 1.4 µm)", "B (2.3 - 5.0 µm)", "C (2.3 µm upward)"]
 
     # axes[0,0] Temperature distribution [oC]
     ser = dfh.loc[dfh.index[-1], "T_0":"T_35"].copy()  # last row
+    print(ser)
     ser.index = model.node_coordinates * 10**3  # unit m to mm
     axes[0,0].plot(ser.index, ser, label=rad_name, linestyle=linestyle, marker=marker, markersize=marker_size)
     axes[0, 0].set_xlim((0, 5.4))
@@ -83,6 +78,8 @@ for rad_name in ["A (0.8 - 1.4 µm)", "B (2.3 - 5.0 µm)", "C (2.3 µm upward)"]
 
     # axes[1,0] Absorbed irradiance [W/m2]
     ser = dfh.loc[dfh.index[-2], "q_irradiance_0":"q_irradiance_35"].copy()  # last row
+    print(ser)
+
     ser.index = model.node_coordinates * 10**3  # unit m to mm
     axes[1,0].plot(ser.index, ser, label=rad_name, linestyle=linestyle, marker=marker, markersize=marker_size,)
     axes[1, 0].set_ylim((0, 250))
@@ -140,3 +137,4 @@ plt.subplots_adjust(wspace=0.2)
 # Saving the figure
 fig1.savefig(config.FIGURE_PATH + "MSM_Nomoto2021_Result_1.svg")
 plt.show()
+

@@ -4,15 +4,9 @@ import pandas as pd
 import os
 
 # ----------File/Folder path configration----------
-# (Please update as needed, all data is in Task 4 folder of the shared folder)
-CURRENT_DIRECTORY = os.getcwd()
+PROJECT_DIRECTORY = "C:\\Users\\monyo\\PycharmProjects\\wavelength" # (Please update as needed)
 
-# Data directory
-figure_directory_name = "data"
-if not os.path.exists(figure_directory_name):
-    os.makedirs(os.path.join(CURRENT_DIRECTORY, figure_directory_name), exist_ok=True)
-
-DATA_DIRECTORY = os.path.join(CURRENT_DIRECTORY, "data")
+DATA_DIRECTORY = os.path.join(PROJECT_DIRECTORY, "data")
 RAW_DATA_DIRECTORY = os.path.join(DATA_DIRECTORY, "raw")
 # PROCESSED_DATA_DIRECTORY = os.path.join(DATA_DIRECTORY, "processed")
 # SUMMARY_DATA_DIRECTORY = os.path.join(DATA_DIRECTORY, "summary")
@@ -20,8 +14,8 @@ RAW_DATA_DIRECTORY = os.path.join(DATA_DIRECTORY, "raw")
 # Figure directory
 figure_directory_name = "figures"
 if not os.path.exists(figure_directory_name):
-    os.makedirs(os.path.join(CURRENT_DIRECTORY, figure_directory_name), exist_ok=True)
-FIGURE_PATH = os.path.join(CURRENT_DIRECTORY, figure_directory_name)
+    os.makedirs(os.path.join(PROJECT_DIRECTORY, figure_directory_name), exist_ok=True)
+FIGURE_PATH = os.path.join(PROJECT_DIRECTORY, figure_directory_name)
 
 # --------------------
 
