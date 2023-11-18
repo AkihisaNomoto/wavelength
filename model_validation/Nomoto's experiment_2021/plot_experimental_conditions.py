@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import configration as config
 
 # Constants
-DATA_FILE_PATH = "C:\\Users\\monyo\\PycharmProjects\\wavelength\\model_validation\\Nomoto's experiment_2021\\data\\filter_and_radiation_spectrum.xlsx"
+DATA_FILE_PATH = "/data/Nomoto_2021_filter_and_radiation_spectrum.xlsx"
 FIGURE_SAVE_PATH = config.FIGURE_PATH  # You need to specify the actual save directory
 
 # Read data from Excel file
@@ -36,7 +36,7 @@ total = df['normalized_radiation_C'].sum()
 df['normalized_radiation_C'] /= total
 
 # Save the file as input summary
-df.to_csv('input_summary.csv', index=False)
+df.to_csv('Nomoto_2021_spectral_irradiance_conditions.csv', index=False)
 
 # Plot radiation levels
 axes[0].plot(x, radiation_a, label="Radiation A")

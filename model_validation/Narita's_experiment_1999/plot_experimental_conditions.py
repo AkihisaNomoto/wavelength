@@ -7,7 +7,7 @@ import configration as config
 plt.rcParams['font.family'] = 'Arial'
 
 # Constants
-DATA_FILE_PATH = "C:\\Users\\monyo\\PycharmProjects\\wavelength\\model_validation\\Narita's_experiment_1999\\normalized_spectral_radiance.csv"
+DATA_FILE_PATH = "/data/Narita_1999_normalized_spectral_radiance.csv"
 
 # Define radiation intensity (each condition is the same value)
 radiation_intensity = 1220 # [W/m2]

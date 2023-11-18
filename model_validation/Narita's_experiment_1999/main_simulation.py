@@ -6,7 +6,7 @@ import plot_experimental_conditions as condition
 import configration as config
 
 # Constants
-DATA_FILE_PATH = "C:\\Users\\monyo\\PycharmProjects\\wavelength\\model_validation\\Narita's_experiment_1999\\normalized_spectral_radiance.csv"
+DATA_FILE_PATH = "/data/Narita_1999_normalized_spectral_radiance.csv"
 plt.rcParams['font.family'] = 'Arial'
 
 # Read the data
@@ -34,7 +34,6 @@ for rad_name in ["Visible (0.30–0.84 µm)", "Near-infrared (0.80 – 1.35 µm)
     model.T_core = t_core
     model.hc = hc
     model.hr = hr
-    # model.q_total_irradiance = q_total
 
     model.q_spectrum = df[rad_name]
 
@@ -135,6 +134,6 @@ for i, row in enumerate(axes):
 plt.subplots_adjust(wspace=0.2)
 
 # Saving the figure
-fig1.savefig(config.FIGURE_PATH + "MSM_Nomoto2021_Result_1.svg")
+fig1.savefig(config.FIGURE_PATH + "Narita_1999_simulation_results.svg")
 plt.show()
 

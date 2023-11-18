@@ -16,7 +16,6 @@ df.index = df["wavelength_nm"]
 # data in coloums
 wavelength = df["wavelength_nm"] * 10**-3  # from nm to µm
 
-# print(spectral_scattering_coefficient)
 
 class ReceptorModel:
     """
@@ -36,7 +35,9 @@ class ReceptorModel:
         # Initial conditions for the simulation
         self.simulation_time = 0  # cumulative simulation time [s]
         self.initial_temperature = 34  # initial temperature of skin layers [°C]
-        self.T = np.ones(self.n) * self.initial_temperature  # temperature distribution across layers
+        self.T = (
+            np.ones(self.n) * self.initial_temperature
+        )  # temperature distribution across layers
 
         # Core and environmental temperatures
         self.T_core = 36.9  # core body temperature [°C]
@@ -45,8 +46,12 @@ class ReceptorModel:
 
         # Irradiance related properties
         self.q_total_irradiance = 0  # total irradiance [W/m²]
-        self.wavelengths = np.arange(300, 50001, 10)  # wavelengths from 300nm to 50000nm
-        self.q_spectrum = pd.Series(np.zeros(len(self.wavelengths)), index=self.wavelengths)  # spectral irradiance
+        self.wavelengths = np.arange(
+            300, 50001, 10
+        )  # wavelengths from 300nm to 50000nm
+        self.q_spectrum = pd.Series(
+            np.zeros(len(self.wavelengths)), index=self.wavelengths
+        )  # spectral irradiance
 
         # Heat transfer coefficients
         self.hc = 4  # convection heat transfer coefficient [W/m²K]
@@ -62,7 +67,7 @@ class ReceptorModel:
         self._initialize_parameters()
 
         # Simulation results and phases
-        self.results = {}  # stores results of the simulation
+        self.results = {}  # dict results of the simulation
         self.phases = []  # list to store different simulation phases
 
     def _initialize_parameters(self):
@@ -72,19 +77,27 @@ class ReceptorModel:
         resistance, and absorption properties.
         """
         # Heat transfer coefficient, layer thickness, and coordinates
-        self.h = self.hc + self.hr  # combined heat transfer coefficient [W/m²K]
+        self.h = self.hc + self.hr  # total heat transfer coefficient [W/m²K]
         self.dx = self.length / self.n  # thickness of each skin layer [m]
-        self.node_coordinates = np.linspace(self.dx / 2, self.length - self.dx / 2, self.n)  # coordinates of each layer [m]
+        self.node_coordinates = np.linspace(
+            self.dx / 2, self.length - self.dx / 2, self.n
+        )  # coordinates of each layer [m]
 
         # Heat capacity and conductance
         self.capacity = 4.3e6 * self.dx  # heat capacity [J/m²K]
         self.conductance = 0.25  # heat conductance [W/mK]
-        self.diffusivity = 1 / (self.dx / self.conductance * self.capacity)  # thermal diffusivity [m²/s]
+        self.diffusivity = 1 / (
+            self.dx / self.conductance * self.capacity
+        )  # thermal diffusivity [m²/s]
 
         # Thermal resistances
         self.r_skin2core = self.dx / (2 * self.conductance)  # skin to core [m²K/W]
-        self.r_skin2skin = self.dx / self.conductance  # skin layer to skin layer [m²K/W]
-        self.r_skin2amb = self.dx / (2 * self.conductance) + 1 / self.h  # skin to ambient [m²K/W]
+        self.r_skin2skin = (
+            self.dx / self.conductance
+        )  # skin layer to skin layer [m²K/W]
+        self.r_skin2amb = (
+            self.dx / (2 * self.conductance) + 1 / self.h
+        )  # skin to ambient [m²K/W]
 
         # Absorption rates for different wavelengths
         self.absorption_sw = 0.70  # short wavelength absorption rate
@@ -92,7 +105,6 @@ class ReceptorModel:
 
         # Stefan-Boltzmann constant
         self.sigma = 5.67e-8  # [W/m²K⁴]
-
 
     def _set_skin_properties(self, df):
         """
@@ -102,10 +114,18 @@ class ReceptorModel:
         - df (DataFrame): A DataFrame containing spectral properties of the skin.
         """
         # Ensure the spectral properties align with the wavelengths
-        self.spectral_reflectance = df["reflectance_nd"].reindex(self.wavelengths, fill_value=0)
-        self.spectral_transmittance = df["transmittance_nd"].reindex(self.wavelengths, fill_value=0)
-        self.spectral_absorption_coefficient = df["absorption_coefficient_1/mm"].reindex(self.wavelengths, fill_value=0)
-        self.spectral_scattering_coefficient = df["scattering_coefficient_1/mm"].reindex(self.wavelengths, fill_value=0)
+        self.spectral_reflectance = df["reflectance_nd"].reindex(
+            self.wavelengths, fill_value=0
+        )
+        self.spectral_transmittance = df["transmittance_nd"].reindex(
+            self.wavelengths, fill_value=0
+        )
+        self.spectral_absorption_coefficient = df[
+            "absorption_coefficient_1/mm"
+        ].reindex(self.wavelengths, fill_value=0)
+        self.spectral_scattering_coefficient = df[
+            "scattering_coefficient_1/mm"
+        ].reindex(self.wavelengths, fill_value=0)
 
     def _replace_nan_with_zero(self, lst):
         """
@@ -142,7 +162,12 @@ class ReceptorModel:
 
         # Add the phase to the simulation
         self.phases.append(
-            {"duration_in_sec": duration_in_sec, "t_db": t_db, "t_r": t_r, "q_irradiance": q_irradiance}
+            {
+                "duration_in_sec": duration_in_sec,
+                "t_db": t_db,
+                "t_r": t_r,
+                "q_irradiance": q_irradiance,
+            }
         )
 
     def reset_simulation(self):
@@ -183,7 +208,9 @@ class ReceptorModel:
         self.q_spectral_irradiance = self.q_total_irradiance * self.q_spectrum
 
         if isinstance(self.q_spectral_irradiance, np.ndarray):
-            self.q_spectral_irradiance = pd.Series(self.q_spectral_irradiance, index=self.q_spectrum.index)
+            self.q_spectral_irradiance = pd.Series(
+                self.q_spectral_irradiance, index=self.q_spectrum.index
+            )
 
         self.q_irradiance_nodes = []
         for x_cord in self.node_coordinates:
@@ -209,109 +236,14 @@ class ReceptorModel:
                     )
                 )
             )
-            irradiance_at_node = irradiance_at_node + irradiance_at_node * self.dt / self.capacity
+            irradiance_at_node = (
+                irradiance_at_node + irradiance_at_node * self.dt / self.capacity
+            )
             self.q_irradiance_nodes.append(irradiance_at_node.sum())
 
         # Reverse the array to align with the core side
         self.q_distribution_nodes = np.array(self.q_irradiance_nodes[::-1])
         return self.q_distribution_nodes
-
-    # def simulate(self, show_input=False):
-    #     """
-    #     Simulate the thermal response of skin receptors over defined phases.
-    #
-    #     Parameters:
-    #     - show_input (bool): If True, include input conditions in the output DataFrame.
-    #
-    #     Returns:
-    #     - pd.DataFrame: A DataFrame containing the simulation results, including temperatures and thermal responses.
-    #
-    #     Raises:
-    #     - ValueError: If no phases have been added before simulation.
-    #     """
-    #     # Check if at least one phase is added
-    #     if not self.phases:
-    #         raise ValueError("At least one phase must be added before simulation.")
-    #
-    #     # Initialize variables for simulation
-    #     T = np.ones(self.n) * self.initial_temperature # Node's temperature
-    #     T_history = [] # List to store temperature history
-    #     q_irradiance_history = []  # List to store irradiance at each node
-    #     q_total_flux = np.zeros(self.n) # Heat flux with all types of heat transfer (conduction, irradiation etc.)
-    #     input_conditions = [] # List to store input conditions if show_input is True
-    #     current_time = 0 # Track current time in the simulation
-    #
-    #     # Record initial conditions
-    #     T_history.append(np.append([current_time, self.dt], T.copy()))
-    #
-    #     # Iterate over each phase
-    #     for phase in self.phases:
-    #         self.update_environmental_conditions(phase)
-    #         self.q_irradiance_nodes = self.calculate_radiation_distribution()
-    #         print(self.q_irradiance_nodes)
-    #
-    #         # Number of iterations for the current phase
-    #         iteration_number = int(phase["duration_in_sec"] / self.dt)
-    #         for _ in range(iteration_number + 1):
-    #             # Heat balance equations except the boundaries
-    #             for i in range(1, self.n - 1):
-    #                 q_total_flux[i] = (
-    #                     (T[i - 1] - T[i]) / self.r_skin2skin
-    #                     + (T[i + 1] - T[i]) / self.r_skin2skin
-    #                     + self.q_irradiance_nodes[i]
-    #                 )
-    #             # Heat balance equations at the boundaries
-    #             q_total_flux[0] = (
-    #                 (T[1] - T[0]) / self.r_skin2skin
-    #                 + (self.T_core - T[0]) / self.r_skin2core
-    #                 + self.q_irradiance_nodes[0]
-    #             )
-    #             q_total_flux[self.n - 1] = (
-    #                 (T[self.n - 2] - T[self.n - 1]) / self.r_skin2skin
-    #                 + (self.T_db - T[self.n - 1]) / self.r_skin2amb
-    #                 + self.sigma * self.absorption_lw * (self.T_r + 273.15) ** 4
-    #                 - self.sigma * self.absorption_lw * (T[self.n - 1] + 273.15) ** 4
-    #                 + self.q_irradiance_nodes[self.n - 1]
-    #             )
-    #
-    #             # Update new temperatures
-    #             T = T + q_total_flux * self.dt / self.capacity
-    #
-    #             current_time += self.dt
-    #
-    #             if current_time % 1.0 < self.dt:
-    #                 T_history.append(np.append([int(current_time), self.dt], T.copy()))
-    #                 # Store input conditions
-    #                 if show_input:
-    #                     q_irradiance_history.append(self.q_irradiance_nodes.copy())
-    #                     input_conditions.append([self.T_core, self.T_db, self.T_r, self.q_total_irradiance])
-    #
-    #     columns = ["Current_Time", "dt"] + ["T_" + str(i) for i in range(self.n)]
-    #     df = pd.DataFrame(T_history, columns=columns)
-    #
-    #     # Additional Calculations
-    #     df["T_warm"] = (df["T_33"] + 5 * df["T_32"]) / 6  # Warm receptor temperature
-    #     df["dT_warm"] = df["T_warm"].diff() * self.dt  # Derivative of warm receptor temperature
-    #     df["Rt"] = (
-    #          self.coef_static_warm_receptor * (df["T_warm"]) + self.coef_dynamic_warm_receptor * (df["dT_warm"]) / self.dt
-    #     )  # Thermal response
-    #     df["dRt"] = df["Rt"].diff()  # Derivative of thermal response
-    #     time_to_integrate = 20
-    #     df["PSI"] = (
-    #         df["dRt"].rolling(int(time_to_integrate/self.dt)).sum()
-    #     )  # Integral of dRt over a window
-    #
-    #     # Add input conditions to DataFrame if show_input is True
-    #     if show_input:
-    #         input_df = pd.DataFrame(input_conditions, columns=["T_core", "T_db", "T_r", "q_total_irradiance"])
-    #         df = pd.concat([df, input_df], axis=1)
-    #
-    #         # Add q_irradiance_nodes to DataFrame
-    #         q_irradiance_columns = ["q_irradiance_" + str(i) for i in range(self.n)]
-    #         q_irradiance_df = pd.DataFrame(q_irradiance_history, columns=q_irradiance_columns)
-    #         df = pd.concat([df, q_irradiance_df], axis=1)
-    #
-    #     return df
 
     def _calculate_heat_flux(self, T):
         """
@@ -349,7 +281,9 @@ class ReceptorModel:
 
         return q_total_flux
 
-    def _prepare_dataframe(self, T_history, q_irradiance_history, input_conditions, show_input):
+    def _prepare_dataframe(
+        self, T_history, q_irradiance_history, input_conditions, show_input
+    ):
         """
         Prepare a DataFrame containing the simulation results.
 
@@ -368,23 +302,31 @@ class ReceptorModel:
 
         # Additional Calculations
         df["T_warm"] = (df["T_33"] + 5 * df["T_32"]) / 6  # Warm receptor temperature
-        df["dT_warm"] = df["T_warm"].diff() * self.dt  # Derivative of warm receptor temperature
+        df["dT_warm"] = (
+            df["T_warm"].diff() * self.dt
+        )  # Derivative of warm receptor temperature
         df["Rt"] = (
-             self.coef_static_warm_receptor * (df["T_warm"]) + self.coef_dynamic_warm_receptor * (df["dT_warm"]) / self.dt
+            self.coef_static_warm_receptor * (df["T_warm"])
+            + self.coef_dynamic_warm_receptor * (df["dT_warm"]) / self.dt
         )  # Thermal response
         df["dRt"] = df["Rt"].diff()  # Derivative of thermal response
         time_to_integrate = 20
         df["PSI"] = (
-            df["dRt"].rolling(int(time_to_integrate/self.dt)).sum()
+            df["dRt"].rolling(int(time_to_integrate / self.dt)).sum()
         )  # Integral of dRt over a window
 
         # Include input conditions if requested
         if show_input:
-            input_df = pd.DataFrame(input_conditions, columns=["T_core", "T_db", "T_r", "q_total_irradiance"])
+            input_df = pd.DataFrame(
+                input_conditions,
+                columns=["T_core", "T_db", "T_r", "q_total_irradiance"],
+            )
             df = pd.concat([df, input_df], axis=1)
 
             q_irradiance_columns = ["q_irradiance_" + str(i) for i in range(self.n)]
-            q_irradiance_df = pd.DataFrame(q_irradiance_history, columns=q_irradiance_columns)
+            q_irradiance_df = pd.DataFrame(
+                q_irradiance_history, columns=q_irradiance_columns
+            )
             df = pd.concat([df, q_irradiance_df], axis=1)
 
         return df
@@ -437,12 +379,15 @@ class ReceptorModel:
 
                     if show_input:
                         q_irradiance_history.append(self.q_irradiance_nodes.copy())
-                        input_conditions.append([self.T_core, self.T_db, self.T_r, self.q_total_irradiance])
+                        input_conditions.append(
+                            [self.T_core, self.T_db, self.T_r, self.q_total_irradiance]
+                        )
 
         # Convert simulation data to DataFrame
-        df = self._prepare_dataframe(T_history, q_irradiance_history, input_conditions, show_input)
+        df = self._prepare_dataframe(
+            T_history, q_irradiance_history, input_conditions, show_input
+        )
         return df
-
 
 
 # # Sample usage
