@@ -6,6 +6,7 @@ import configration as config
 # Set global matplotlib parameters for font
 plt.rcParams['font.family'] = 'Arial'
 
+
 # Define constants
 DATA_FILE_PATH = (
     "C:\\Users\\monyo\\PycharmProjects\\wavelength\\data\\skin-spectral-properties.csv"
@@ -152,14 +153,17 @@ axes[1].set_ylabel("$K_λ$, $S_λ$ [mm$\mathregular{^{-1}}$]")
 axes[1].set_xlabel("Wavelength [μm]")
 
 # Define the labels for the subplots
-subplot_labels = ['(a)', '(b)']
+subplot_labels = ['a', 'b']
 # Loop through each subplot to add the labels 'a)' and 'b)'
 for i, ax in enumerate(axes):
     # Place the text slightly outside the upper left corner of the current subplot
     # The exact position may need to be adjusted depending on the subplot's data and limits
-    ax.text(-0.1, 1.0, subplot_labels[i], transform=ax.transAxes, fontsize=12, fontweight='bold', va='center', ha='right')
+    ax.text(-0.1, 1.0, subplot_labels[i], transform=ax.transAxes, fontsize=14, fontweight='bold', va='center', ha='right')
 
 fig.tight_layout()
 fig.align_labels()
-plt.savefig(os.path.join(config.FIGURE_PATH,"Spectral radiative properties of the skin (Japanese).svg"))
+plt.savefig(os.path.join(config.FIGURE_DIRECTORY,"Spectral radiative properties of the skin (Japanese).svg"))
 plt.show()
+
+
+

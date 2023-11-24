@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 from model import ReceptorModel
-import plot_experimental_conditions as condition
+import plot_Nomoto_2021_experimental_conditions as condition
 import configration as config
 df = condition.df
 # df.columns = ["wavelength", "ab", "scat", "ref", "A (0.8 - 1.4 µm)", "B (2.3 - 5.0 µm)", "C (2.3 µm upward)"]

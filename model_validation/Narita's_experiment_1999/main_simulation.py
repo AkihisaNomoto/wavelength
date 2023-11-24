@@ -2,7 +2,6 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from model import ReceptorModel
-import plot_experimental_conditions as condition
 import configration as config
 
 # Constants

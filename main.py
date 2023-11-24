@@ -2,11 +2,15 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 from model import ReceptorModel
 import configration as config
 
 # Constants
 plt.rcParams["font.family"] = "Arial"
+plt.rcParams["axes.prop_cycle"] = plt.cycler("color", plt.get_cmap("Set1").colors)
+
+# Define summary dictionary including experimental infomation
 experiments_summary_dict = {
     "Narita_1999": {
         "q_total": 1220,
@@ -23,8 +27,11 @@ experiments_summary_dict = {
         ],
         "figure_configuration": {
             "y_axis_temperature_range": [32, 37],
+            "y_axis_temperature_ticks": list(range(32, 38, 1)),
             "y_axis_absorbed_irradiance_range": [0, 400],
+            "y_axis_absorbed_irradiance_ticks": list(range(0, 500, 100)),
             "y_axis_impulse_frequency_range": [0, 20],
+            "y_axis_impulse_frequency_ticks": list(range(0, 25, 5)),
         },
     },
     "Matsui_1986": {
@@ -38,8 +45,11 @@ experiments_summary_dict = {
         "rad_names": ["A (0.72 - 2.7µm)", "B (1.5 - 4.8µm)", "C (6 - 20µm)"],
         "figure_configuration": {
             "y_axis_temperature_range": [30, 38],
+            "y_axis_temperature_ticks": list(range(30, 39, 2)),
             "y_axis_absorbed_irradiance_range": [0, 2000],
+            "y_axis_absorbed_irradiance_ticks": list(range(0, 2500, 500)),
             "y_axis_impulse_frequency_range": [0, 25],
+            "y_axis_impulse_frequency_ticks": list(range(0, 30, 5)),
         },
     },
     "Nomoto_2021": {
@@ -55,30 +65,36 @@ experiments_summary_dict = {
         "rad_names": ["A (0.8 - 1.4 µm)", "B (2.3 - 5.0 µm)", "C (2.3 µm upward)"],
         "figure_configuration": {
             "y_axis_temperature_range": [31, 34],
+            "y_axis_temperature_ticks": list(range(31, 35, 1)),
             "y_axis_absorbed_irradiance_range": [0, 250],
+            "y_axis_absorbed_irradiance_ticks": list(range(0, 300, 50)),
             "y_axis_impulse_frequency_range": [0, 5],
+            "y_axis_impulse_frequency_ticks": list(range(0, 6, 1)),
         },
     },
 }
 
-model = ReceptorModel()
-
-
 def simulate_experiment_and_get_dataframe(experiments_summary_dict, which_experiment):
+    # Get an experimental information from summary dictionary
     experiment_dict = experiments_summary_dict[which_experiment]
+
+    # Get rad name
     rad_names = experiment_dict["rad_names"]
 
-    # Read the data
+    # Define spectral irradiation data
     df = pd.read_csv(experiment_dict["data_path"])
-
     df.columns = ["wavelength_nm"] + rad_names
     df.index = df["wavelength_nm"]
 
     result = {}
+    # Iterate by radiation spectrum
     for rad_name in rad_names:  # [W/m2/10nm]
-        model = ReceptorModel()
-        model.reset_simulation()
 
+        # Define receptor model instance
+        model = ReceptorModel()
+
+        # Set experimental conditions
+        model.reset_simulation()
         model.T_core = experiment_dict["t_core"]
         model.hc = experiment_dict["hc"]
         model.hr = experiment_dict["hr"]
@@ -132,7 +148,7 @@ def simulate_experiment_and_get_dataframe(experiments_summary_dict, which_experi
         # Summarize results
         result[rad_name] = df_simulation_results.copy()
 
-        print(result[rad_name])
+        # print(result[rad_name])
 
     return result
 
@@ -142,12 +158,19 @@ def plot_experiment_results(results, model, experiments_summary_dict, which_expe
 
     experiment_dict = experiments_summary_dict[which_experiment]
 
-    for rad_name in results.keys():
+    # Define color mapping
+    colors = ['red', 'blue', 'green']
+
+    for i, rad_name in enumerate(results.keys()):
         dfh = results[rad_name].copy()
 
-        marker_size = 5
-        linestyle = "dashed"
+        # Define figure configuration
+        marker_size = 4
+        linestyle = "solid"
         marker = "o"
+        alpha = 1
+        makerface_color = "white"
+        # color = colors[i % len(colors)]
 
         # Temperature distribution
         ser = dfh.loc[dfh.index[-1], "T_0":"T_35"].copy()  # last row
@@ -158,7 +181,10 @@ def plot_experiment_results(results, model, experiments_summary_dict, which_expe
             label=rad_name,
             linestyle=linestyle,
             marker=marker,
+            markerfacecolor=makerface_color,
             markersize=marker_size,
+            alpha=alpha,
+            # color=color,
         )
         # x axis
         axes[0, 0].set_xlim((0, 5.4))
@@ -166,6 +192,9 @@ def plot_experiment_results(results, model, experiments_summary_dict, which_expe
         # y axis
         axes[0, 0].set_ylim(
             experiment_dict["figure_configuration"]["y_axis_temperature_range"]
+        )
+        axes[0, 0].set_yticks(
+            experiment_dict["figure_configuration"]["y_axis_temperature_ticks"]
         )
 
         # Time series of warm receptor temperature
@@ -177,7 +206,10 @@ def plot_experiment_results(results, model, experiments_summary_dict, which_expe
             label=rad_name,
             linestyle=linestyle,
             marker=marker,
+            markerfacecolor=makerface_color,
             markersize=marker_size,
+            alpha=alpha,
+            # color=color,
         )
         # x axis
         axes[0, 1].set_xlim((0, 20))
@@ -185,6 +217,9 @@ def plot_experiment_results(results, model, experiments_summary_dict, which_expe
         # y axis
         axes[0, 1].set_ylim(
             experiment_dict["figure_configuration"]["y_axis_temperature_range"]
+        )
+        axes[0, 1].set_yticks(
+            experiment_dict["figure_configuration"]["y_axis_temperature_ticks"]
         )
 
         # Absorbed irradiance
@@ -198,13 +233,19 @@ def plot_experiment_results(results, model, experiments_summary_dict, which_expe
             label=rad_name,
             linestyle=linestyle,
             marker=marker,
+            markerfacecolor=makerface_color,
             markersize=marker_size,
+            alpha=alpha,
+            # color=color,
         )
         # x axis
         axes[1, 0].sharex(axes[0, 0])
         # y axis
         axes[1, 0].set_ylim(
             experiment_dict["figure_configuration"]["y_axis_absorbed_irradiance_range"]
+        )
+        axes[1, 0].set_yticks(
+            experiment_dict["figure_configuration"]["y_axis_absorbed_irradiance_ticks"]
         )
 
         # Impulse frequency
@@ -217,13 +258,18 @@ def plot_experiment_results(results, model, experiments_summary_dict, which_expe
             linestyle=linestyle,
             marker=marker,
             markersize=marker_size,
-            alpha=0.5,
+            markerfacecolor=makerface_color,
+            alpha=alpha,
+            # color=color,
         )
         # x axis
         axes[1, 1].sharex(axes[0, 1])
         # y axis
         axes[1, 1].set_ylim(
             experiment_dict["figure_configuration"]["y_axis_impulse_frequency_range"]
+        )
+        axes[1, 1].set_yticks(
+            experiment_dict["figure_configuration"]["y_axis_impulse_frequency_ticks"]
         )
 
     # Set labels and layout
@@ -238,7 +284,7 @@ def plot_experiment_results(results, model, experiments_summary_dict, which_expe
 
     # Indicating warm receptor location and layout adjustments
     for i in [0, 1]:
-        axes[i, 0].axvline(4.9, 0, 500, linestyle="dotted", color="grey")
+        axes[i, 0].axvline(4.9, 0, 500, linestyle="dotted", color="black")
         axes[i, 0].text(
             0.77,
             0.9,
@@ -255,7 +301,7 @@ def plot_experiment_results(results, model, experiments_summary_dict, which_expe
     # Adding legend and subplot labels
     handles0, labels0 = axes[0, 0].get_legend_handles_labels()
     fig.legend(handles0, labels0, ncol=3, loc="upper center", frameon=False)
-    subplot_labels = [["(a)", "(c)"], ["(b)", "(d)"]]
+    subplot_labels = [["a", "c"], ["b", "d"]]
     for i, row in enumerate(axes):
         for j, ax in enumerate(row):
             ax.text(
@@ -263,7 +309,7 @@ def plot_experiment_results(results, model, experiments_summary_dict, which_expe
                 0.9,
                 subplot_labels[i][j],
                 transform=ax.transAxes,
-                fontsize=14,
+                fontsize=16,
                 fontweight="bold",
                 va="center",
                 ha="right",
@@ -272,12 +318,14 @@ def plot_experiment_results(results, model, experiments_summary_dict, which_expe
     plt.subplots_adjust(wspace=0.2)
 
     # Saving the figure
-    fig.savefig(
-        os.path.join(
-            config.FIGURE_DIRECTORY, f"{which_experiment}_simulation_results.svg"
+    file_extensions = [".svg", ".png"]
+    for extension in file_extensions:
+        fig.savefig(
+            os.path.join(
+                config.FIGURE_DIRECTORY, f"{which_experiment}_simulation_results{extension}"
+            )
         )
-    )
-    plt.show()
+    # plt.show()
 
 
 if __name__ == "__main__":

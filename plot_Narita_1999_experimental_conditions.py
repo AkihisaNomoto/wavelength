@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -5,9 +6,10 @@ import configration as config
 
 # Set global matplotlib parameters for font
 plt.rcParams['font.family'] = 'Arial'
+plt.rcParams["axes.prop_cycle"] = plt.cycler("color", plt.get_cmap("Set1").colors)
 
 # Constants
-DATA_FILE_PATH = "/data/Narita_1999_normalized_spectral_radiance.csv"
+DATA_FILE_PATH = os.path.join(config.DATA_DIRECTORY, "Narita_1999_normalized_spectral_radiance.csv")
 
 # Define radiation intensity (each condition is the same value)
 radiation_intensity = 1220 # [W/m2]
@@ -64,9 +66,9 @@ plt.xlabel("Wavelength [μm]")
 plt.ylabel("Spectral irradiance [W/(m²μm)]")
 
 # Adjust the layout and legend
-plt.tight_layout(rect=[0, 0, 1, 0.92])
+plt.tight_layout(rect=[0, 0, 1, 0.9])
 plt.legend(bbox_to_anchor=(0.5, 1.23), ncol=2, loc='upper center',frameon=False,fontsize=10)
 
 # Save and show the figure
-plt.savefig(f"{config.FIGURE_PATH}Narita1999_IradiationConditions.svg")
+plt.savefig(os.path.join(config.FIGURE_DIRECTORY, "Narita_1999_iradiation_conditions.svg"))
 plt.show()

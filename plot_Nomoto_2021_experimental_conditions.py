@@ -2,11 +2,11 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import configration as config
+plt.rcParams['font.family'] = 'Arial'
+plt.rcParams["axes.prop_cycle"] = plt.cycler("color", plt.get_cmap("Set1").colors)
 
 # Constants
-DATA_FILE_PATH = "/data/Nomoto_2021_filter_and_radiation_spectrum.xlsx"
-FIGURE_SAVE_PATH = config.FIGURE_PATH  # You need to specify the actual save directory
-
+DATA_FILE_PATH = os.path.join(config.DATA_DIRECTORY, "Nomoto_2021_filter_and_radiation_spectrum.xlsx")
 # Read data from Excel file
 df = pd.read_excel(DATA_FILE_PATH, sheet_name="Spectral properties")
 df.columns = ["wavelength", "Filter A", "Filter B", "Radiation A", "Radiation B", "Radiation C"]
@@ -99,14 +99,12 @@ fig.tight_layout()
 fig.align_labels()
 
 # Add subplot labels ('a)' and 'b)')
-subplot_labels = ['(a)', '(b)']
+subplot_labels = ['a', 'b']
 for i, ax in enumerate(axes):
-    ax.text(-0.07, 1.0, subplot_labels[i], transform=ax.transAxes, fontsize=12, fontweight='bold', va='center', ha='right')
+    ax.text(-0.1, 1.0, subplot_labels[i], transform=ax.transAxes, fontsize=14, fontweight='bold', va='center', ha='right')
 
 # Save the figure
-if not os.path.exists(FIGURE_SAVE_PATH):
-    os.makedirs(FIGURE_SAVE_PATH)
-fig.savefig(os.path.join(FIGURE_SAVE_PATH, "Radiation_and_Filter_Nomoto2021.svg"))
+fig.savefig(os.path.join(config.FIGURE_DIRECTORY, "Nomoto_2021_irradiation_conditions.svg"))
 
 # Display the plot
 plt.show

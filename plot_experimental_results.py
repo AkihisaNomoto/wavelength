@@ -8,7 +8,7 @@ import configration as config
 plt.rcParams['font.family'] = 'Arial'
 
 # Constants
-DATA_FILE_PATH = "C:\\Users\\monyo\\PycharmProjects\\wavelength\\model_validation\\Nomoto's experiment_2021\\ExpData_Nomoto_2021.xlsx"
+DATA_FILE_PATH = os.path.join(config.DATA_DIRECTORY, "Nomoto_2021_experimental_data.xlsx")
 
 # Read the data
 df = pd.read_excel(DATA_FILE_PATH, sheet_name="箱ひげ図２")
@@ -20,7 +20,7 @@ df.columns = ["sex", "cond",
 
 print(df)
 
-fig, axes = plt.subplots(3, 2, sharex=True, figsize=(12,4.5))
+fig, axes = plt.subplots(3, 2, sharex=True, figsize=(12,6))
 # axes[0]
 
 whole = df.copy()
@@ -127,19 +127,26 @@ for i, cond in enumerate(["AとB","BとC","AとC"]):
       b.set(markeredgecolor=c)
 
 # Add subplot labels ('a)' and 'b)')
-subplot_labels = ['(a)', '(b)']
-
-axes[0,0].text(-3.5, 4.5, "(a)", fontsize=12, fontweight='bold', va='center', ha='right')
-axes[0,1].text(-3.5, 4.5, "(b)", fontsize=12, fontweight='bold', va='center', ha='right')
+subplot_labels = ['a', 'b']
+survey_questions = [
+    "Please rate which radiation you feel hotter.",
+    "Please rate which radiation you feel comfortable."
+              ]
+label_height = 4.8
+axes[0,0].text(-3.5, label_height, subplot_labels[0], fontsize=14, fontweight='bold', va='center', ha='right')
+axes[0,1].text(-3.5, label_height, subplot_labels[1], fontsize=14, fontweight='bold', va='center', ha='right')
+axes[0,0].text(-3.5, label_height, survey_questions[0], fontsize=12, fontstyle='italic', va='center', ha='left')
+axes[0,1].text(-3.5, label_height, survey_questions[0], fontsize=12, fontstyle='italic', va='center', ha='left')
 
 for i, names in enumerate(["Male (N=10)", "Female (N=10)", "All subjects (N=20)",]):
   #axes[i,0].set_yticklabels(["All subjects", "Female", "Male"])
   axes[i,0].set_xticks([-3,-2,-1,0,1,2,3])
   axes[2,0].set_xticklabels(["-3", "-2", "-1", "0", "+1", "+2", "+3"])
+  labal_height = 5
   #凡例を記述
-  axes[0,0].text(2.4*i+1, 5.7, names,verticalalignment="center",fontsize=12)
+  axes[0,0].text(2.4*i+1, labal_height, names,verticalalignment="center",fontsize=12)
   colors=["blue", "red","black"]
-  axes[0,0].text(2.4*i+0.5, 5.8, "□" ,color=colors[i],verticalalignment="center",fontsize=20, fontweight="bold")
+  axes[0,0].text(2.4*i+0.5, labal_height+0.1, "□" ,color=colors[i],verticalalignment="center",fontsize=20, fontweight="bold")
   axes[i,0].tick_params(left=False,labelleft=False)
   axes[i,1].tick_params(left=False,labelleft=False)
 
@@ -165,20 +172,28 @@ for i, names in enumerate(["very comf.", "comf.", "slightly comf.", "neutral", "
   axes[2,1].text(i-3, -0.4, names ,verticalalignment="center",horizontalalignment="center",fontsize=10)
 
 #テキスト入力
-axes[0,0].text(0, 4, " → radiation of longer wavelength",horizontalalignment="left", fontsize=10)
-axes[0,0].text(0, 4, "radiation of shorter wavelength ← ",horizontalalignment="right", fontsize=10)
-axes[0,1].text(0, 4, " → radiation of longer wavelength",horizontalalignment="left", fontsize=10)
-axes[0,1].text(0, 4, "radiation of shorter wavelength ← ",horizontalalignment="right", fontsize=10)
+# axes[0,0].text(0, 4, " → radiation of longer wavelength",horizontalalignment="left", fontsize=10)
+# axes[0,0].text(0, 4, "radiation of shorter wavelength ← ",horizontalalignment="right", fontsize=10)
+# axes[0,1].text(0, 4, " → radiation of longer wavelength",horizontalalignment="left", fontsize=10)
+# axes[0,1].text(0, 4, "radiation of shorter wavelength ← ",horizontalalignment="right", fontsize=10)
+
+for i in [0, 1]:
+    axes[0,i].set_title("A vs B", fontsize=12)
+    axes[1,i].set_title("B vs C", fontsize=12)
+    axes[2,i].set_title("A vs C", fontsize=12)
+
+# axes[0,1].set_xlabel("title1", fontsize=12)
+# axes[0,2].set_xlabel("title3", fontsize=12)
 
 axes[2,0].set_xlabel("Relative thermal sensation [-]", labelpad=18,fontsize=12)
 axes[2,1].set_xlabel("Relative thermal comfort [-]", labelpad=18,fontsize=12)
-plt.subplots_adjust(hspace=0)
+plt.subplots_adjust(hspace=1)
 fig.tight_layout()
-plt.subplots_adjust(wspace=0.15, hspace=0)
+plt.subplots_adjust(wspace=0.15, hspace=0.3)
 
 
 #handles, labels0 = axes[0].get_legend_handles_labels() # axes[0]のhandleとlabelを取得
-fig.savefig(os.path.join(config.FIGURE_PATH, "Nomoto2021_Results_20sec.svg"))
+fig.savefig(os.path.join(config.FIGURE_DIRECTORY, "Nomoto_2021_experimental_results_.svg"))
 plt.show()
 
 
