@@ -26,7 +26,7 @@ result = {}
 for rad_name in ["A (0.8 - 1.4 µm)", "B (2.3 - 5.0 µm)", "C (2.3 µm upward)"]:  #[W/m2/10nm]
 
     model = ReceptorModel()
-    model.reset_simulation()
+    model._reset_simulation()
 
     model.T_core = t_core
     model.hc = hc

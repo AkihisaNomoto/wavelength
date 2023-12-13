@@ -3,7 +3,14 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="\Nomoto_2021_spectral_irradiance_conditions.csv">
+        <entry key="\data\Matsui_1986_simulation_results_A (0.72 - 2.7µm).csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\Matsui_1986_simulation_results_B (1.5 - 4.8µm).csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -11,6 +18,27 @@
           </value>
         </entry>
         <entry key="\data\Matsui_1986_simulation_results_C (6 - 20µm).csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\Matsui_1986_simulation_results_Far-infrared  (6 - 20µm).csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\Matsui_1986_simulation_results_Mid- to far-infrared (1.5 - 4.8µm).csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\Matsui_1986_simulation_results_Near- to mid-infrared  (0.72 - 2.7µm).csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -66,7 +94,7 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\data\Nomoto_2021_simulation_results_C (2.3 µm upward).csv">
+        <entry key="\data\Nomoto_2021_simulation_results_C (2.3 µm and above).csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
@@ -80,7 +108,28 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\data\core_temperature_summary_simulated_by_JOS3.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\psi_vs_sensation_vote.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\data\skin-spectral-properties.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\data\wavelength_dependence_from_0.3_to_20_µm.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

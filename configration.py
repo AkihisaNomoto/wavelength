@@ -1,18 +1,21 @@
 import os
-import matplotlib.pyplot as plt
-import pandas as pd
-import os
 
 # ----------File/Folder path configration----------
-PROJECT_DIRECTORY = "C:\\Users\\monyo\\PycharmProjects\\wavelength" # (Please update as needed)
+PROJECT_DIRECTORY = os.getcwd()
 DATA_DIRECTORY = os.path.join(PROJECT_DIRECTORY, "data")
 FIGURE_DIRECTORY = os.path.join(PROJECT_DIRECTORY, "figures")
-NARITA_EXP_SPECTRUM_DATA_PATH = os.path.join(DATA_DIRECTORY, "Narita_1999_normalized_spectral_radiance.csv")
-NOMOTO_EXP_SPECTRUM_DATA_PATH = os.path.join(DATA_DIRECTORY, "Nomoto_2021_spectral_irradiance_conditions.csv")
-MATSUI_EXP_SPECTRUM_DATA_PATH = os.path.join(DATA_DIRECTORY, "Matsui_1986_spectral_irradiance_conditions.csv")
+NARITA_EXP_SPECTRUM_DATA_PATH = os.path.join(
+    DATA_DIRECTORY, "Narita_1999_normalized_spectral_radiance.csv"
+)
+NOMOTO_EXP_SPECTRUM_DATA_PATH = os.path.join(
+    DATA_DIRECTORY, "Nomoto_2021_spectral_irradiance_conditions.csv"
+)
+MATSUI_EXP_SPECTRUM_DATA_PATH = os.path.join(
+    DATA_DIRECTORY, "Matsui_1986_spectral_irradiance_conditions.csv"
+)
 
 # FIGURE_SAVE_PATH = FIGURE_PATH  # You need to specify the actual save directory
-INPUT_SPECTRUM_PATH = "data/Nomoto_2021_spectral_irradiance_conditions.csv"
+# INPUT_SPECTRUM_PATH = "data/Nomoto_2021_spectral_irradiance_conditions.csv"
 # --------------------
 
 # plt.rcParams['font.family'] = 'Open Sans'
@@ -26,7 +29,7 @@ INPUT_SPECTRUM_PATH = "data/Nomoto_2021_spectral_irradiance_conditions.csv"
 #     "grid.color": "0.8",
 #     'grid.linestyle': "dotted"})
 
-#sns.set_style("ticks")
+# sns.set_style("ticks")
 
 # # Graph setting
 # plt.rcParams["font.family"] = "Arial"

@@ -28,7 +28,7 @@ result = {}
 for rad_name in ["Visible (0.30–0.84 µm)", "Near-infrared (0.80 – 1.35 µm)", "Mid-infrared (1.70 – 2.30 µm)"]:  #[W/m2/10nm]
 
     model = ReceptorModel()
-    model.reset_simulation()
+    model._reset_simulation()
 
     model.T_core = t_core
     model.hc = hc

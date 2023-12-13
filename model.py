@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
+import pythermalcomfort.models.jos3
 from scipy.sparse import diags
 from scipy.sparse.linalg import spsolve
 import matplotlib.pyplot as plt
 from pythermalcomfort.models import JOS3
+from pythermalcomfort.jos3_functions.parameters import Default
 
 # Define constants
 DATA_FILE_PATH = (
@@ -41,7 +43,7 @@ class ReceptorModel:
 
         # Core and environmental temperatures
         self.T_core = 36.9  # core body temperature [°C]
-        self.T_db = 25  # dry bulb (ambient) temperature [°C]
+        self.T_db = 25  # dry bulb (ambient) te   mperature [°C]
         self.T_r = 25  # radiant temperature [°C]
 
         # Irradiance related properties
@@ -57,17 +59,18 @@ class ReceptorModel:
         self.hc = 4  # convection heat transfer coefficient [W/m²K]
         self.hr = 5  # radiation heat transfer coefficient [W/m²K]
 
-        # Coefficients for cold and warm receptors
+        # Receptor calculation
         self.coef_static_warm_receptor = 2  # Hz/K
         self.coef_static_cold_receptor = -2  # Hz/K
         self.coef_dynamic_warm_receptor = 56  # Hz·s/K
         self.coef_dynamic_cold_receptor = -62  # Hz·s/K
+        self.T_no_static_discharge = 33
 
         # Initialize additional parameters
         self._initialize_parameters()
 
         # Simulation results and phases
-        self.results = {}  # dict results of the simulation
+        self.simulation_results = {}  # dict results of the simulation
         self.phases = []  # list to store different simulation phases
 
     def _initialize_parameters(self):
@@ -95,8 +98,11 @@ class ReceptorModel:
         self.r_skin2skin = (
             self.dx / self.conductance
         )  # skin layer to skin layer [m²K/W]
-        self.r_skin2amb = (
-            self.dx / (2 * self.conductance) + 1 / self.h
+        self.r_skin2amb_convection = (
+            self.dx / (2 * self.conductance) + 1 / self.hc
+        )  # skin to ambient [m²K/W]
+        self.r_skin2amb_radiation = (
+            self.dx / (2 * self.conductance) + 1 / self.hr
         )  # skin to ambient [m²K/W]
 
         # Absorption rates for different wavelengths
@@ -170,7 +176,7 @@ class ReceptorModel:
             }
         )
 
-    def reset_simulation(self):
+    def _reset_simulation(self):
         """
         Reset the simulation to its initial state.
         """
@@ -181,7 +187,7 @@ class ReceptorModel:
         # Clearing all phases
         self.phases = []
 
-    def update_environmental_conditions(self, phase):
+    def _update_environmental_conditions(self, phase):
         """
         Update the environmental conditions based on a given phase.
 
@@ -193,7 +199,7 @@ class ReceptorModel:
         self.T_r = phase["t_r"]
         self.q_total_irradiance = phase["q_irradiance"]
 
-    def calculate_radiation_distribution(self):
+    def _calculate_radiation_distribution(self):
         """
         Calculate the distribution of radiation within the skin layers based on
         spectral irradiance and the optical properties of the skin.
@@ -202,7 +208,7 @@ class ReceptorModel:
         - numpy.ndarray: An array representing the distribution of radiation across the skin layers.
         """
         # Set skin properties
-        self._set_skin_properties(df=df)
+        self.properties = self._set_skin_properties(df=df)
 
         # Calculate the irradiance at each node
         self.q_spectral_irradiance = self.q_total_irradiance * self.q_spectrum
@@ -236,9 +242,9 @@ class ReceptorModel:
                     )
                 )
             )
-            irradiance_at_node = (
-                irradiance_at_node + irradiance_at_node * self.dt / self.capacity
-            )
+            # irradiance_at_node = (
+            #     irradiance_at_node + irradiance_at_node * self.dt / self.capacity
+            # )
             self.q_irradiance_nodes.append(irradiance_at_node.sum())
 
         # Reverse the array to align with the core side
@@ -271,11 +277,17 @@ class ReceptorModel:
             + (self.T_core - T[0]) / self.r_skin2core
             + self.q_irradiance_nodes[0]
         )
+
+        self.q_convection = (self.T_db - T[self.n - 1]) / self.r_skin2amb_convection
+        # self.q_radiation = (self.T_r - T[self.n - 1]) / self.r_skin2amb_radiation
+        self.q_radiation = (
+            self.sigma * self.absorption_lw * (self.T_r + 273.15) ** 4
+            - self.sigma * self.absorption_lw * (T[self.n - 1] + 273.15) ** 4
+        )
         q_total_flux[self.n - 1] = (
             (T[self.n - 2] - T[self.n - 1]) / self.r_skin2skin
-            + (self.T_db - T[self.n - 1]) / self.r_skin2amb
-            + self.sigma * self.absorption_lw * (self.T_r + 273.15) ** 4
-            - self.sigma * self.absorption_lw * (T[self.n - 1] + 273.15) ** 4
+            + self.q_convection
+            + self.q_radiation
             + self.q_irradiance_nodes[self.n - 1]
         )
 
@@ -305,14 +317,15 @@ class ReceptorModel:
         df["dT_warm"] = (
             df["T_warm"].diff() * self.dt
         )  # Derivative of warm receptor temperature
-        df["Rt"] = (
-            self.coef_static_warm_receptor * (df["T_warm"])
+        df["R"] = (
+            self.coef_static_warm_receptor
+            * np.maximum(0, df["T_warm"] - self.T_no_static_discharge)
             + self.coef_dynamic_warm_receptor * (df["dT_warm"]) / self.dt
         )  # Thermal response
-        df["dRt"] = df["Rt"].diff()  # Derivative of thermal response
+        df["dR"] = df["R"].diff()  # Derivative of thermal response
         time_to_integrate = 20
         df["PSI"] = (
-            df["dRt"].rolling(int(time_to_integrate / self.dt)).sum()
+            df["dR"].rolling(int(time_to_integrate / self.dt)).sum()
         )  # Integral of dRt over a window
 
         # Include input conditions if requested
@@ -360,8 +373,8 @@ class ReceptorModel:
 
         # Iterate over each phase
         for phase in self.phases:
-            self.update_environmental_conditions(phase)
-            self.q_irradiance_nodes = self.calculate_radiation_distribution()
+            self._update_environmental_conditions(phase)
+            self.q_irradiance_nodes = self._calculate_radiation_distribution()
 
             # Number of iterations for the current phase
             iteration_number = int(phase["duration_in_sec"] / self.dt)
@@ -390,16 +403,15 @@ class ReceptorModel:
         return df
 
 
-# # Sample usage
-# if __name__ == "__main__":
-#     model = ReceptorModel()
-#     model.T_core = 34
-#     model.add_phase(duration_in_sec=10, t_db=20, t_r=25, q_irradiance=0)
-#     model.add_phase(duration_in_sec=10, t_db=30, t_r=27, q_irradiance=0)
-#     simulation_results = model.simulate()
-#     # model.solve(simulation_time=3600)
-#
-#     print(simulation_results)  # Print the temperature history
-#     simulation_results.to_csv("test.csv")
-#
-#     simulation_results.plot("M_warm")
+# Sample usage
+if __name__ == "__main__":
+    model = ReceptorModel()
+    model.add_phase(duration_in_sec=10, t_db=20, t_r=25, q_irradiance=0)
+    model.add_phase(duration_in_sec=10, t_db=30, t_r=27, q_irradiance=0)
+    simulation_results = model.simulate()
+    # model.solve(simulation_time=3600)
+
+    print(simulation_results)  # Print the temperature history
+    simulation_results.to_csv("test.csv")
+
+    simulation_results.plot("M_warm")
