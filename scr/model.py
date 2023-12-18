@@ -409,9 +409,3 @@ if __name__ == "__main__":
     model.add_phase(duration_in_sec=10, t_db=20, t_r=25, q_irradiance=0)
     model.add_phase(duration_in_sec=10, t_db=30, t_r=27, q_irradiance=0)
     simulation_results = model.simulate()
-    # model.solve(simulation_time=3600)
-
-    print(simulation_results)  # Print the temperature history
-    simulation_results.to_csv("test.csv")
-
-    simulation_results.plot("M_warm")

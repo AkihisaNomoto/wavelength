@@ -452,7 +452,8 @@ def plot_experiment_results(results, model, experiments_summary_dict, which_expe
             os.path.join(
                 config.FIGURE_DIRECTORY,
                 f"{which_experiment}_simulation_results{extension}",
-            )
+            ),
+            dpi=600,
         )
     # plt.show()
 

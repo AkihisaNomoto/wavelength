@@ -136,27 +136,6 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="\model_validation\Narita's_experiment_1999\JOS-3_simulation_results_Narita1994.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\model_validation\Nomoto's experiment_2021\Nomoto_2021_spectral_irradiance_conditions.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\test.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
       </map>
     </option>
   </component>
